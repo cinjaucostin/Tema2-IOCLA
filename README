@@ -1,0 +1,65 @@
+-Reversed One Time Pad:
+    -> Am folosit 2 contori:
+        *unul cu care porneam de la 0 pentru a parcurge sirul plain si a putea introduce
+     in ciphertext(ciphertext[i] si plain[i]) si pe care il incrementam la fiecare pas.
+        *altul cu care porneam de la lungimea lui key - 1 si il decrementam la fiecare pas
+     pentru a putea extrage valoarea caracterului din sirul key(key[len - i -1]).
+    -> Avand cei doi contori si astfel avand posibilitatea sa parcurg cele doua siruri in
+    in acelasi timp a mai ramas doar sa aplic formula data pentru a obtine caracterul criptat:
+        *ciphertext[i] = plain[i] ^ key[len - i - 1].
+
+-Ages:
+    -> Aici pur si simplu m-am folosit de niste variabile declarate in .data pentru a putea retine
+    datele din interiorul unei structuri si astfel eliberand niste registre de care ma puteam
+    folosi ulterior.
+    -> Pentru fiecare structura din vector am aplicat un algoritm de calculare a varstei care se
+    bazeaza pe urmatoarele conditii:
+        *daca ziua curenta este mai mica decat ziua de nastere atunci vom decrementa luna curenta
+     pentru a nu o lua si pe ea in calculul final(luna curenta in acest caz nu conteaza deoarece cum
+     ziua curenta nu este trecuta de ziua de nastere, deci nu a "implinit si luna curenta").
+        *daca luna curenta este mai mica decat luna de nastere, inseamna ca anul curent nu este completat
+     deci nu il vom lua nici pe acesta in calcul, deci vom decrementa anul curent.
+        *in final aveam doar de facut scaderea present_year - birth_year si obtineam varsta pe care
+     o adaugam ulterior in vector.
+
+-Columnar Transposition Cipher:
+    -> In principiu la acest task nu am folosit o matrice doar un vector si am creat
+    un indice cu ajutorul caruia sa putem extrage elementul de pe o anumita coloana 
+    si de pe o anumita linie, gandind astfel matricea ca fiind un vector.
+    -> Acest indice l-am gasit folosindu-ma de exemplul prezentat in cerinta temei:
+         *haystack = "Hai sa dam mana cu mana!".
+         *am "simulat" oarecum introducerea acestor caractere intr-o matrice dupa regula data.
+         *am observat ca elementele de pe coloana 0 corespund cu elementele cu indicii:0 * 5 + 0, 1 * 5 
+         + 0, 2 * 5 + 0, 3 * 5 + 0, 4 * 5 + 0, elementele de pe coloana 1 corespund cu elementele cu 
+         indicii:0 * 5 + 1, 1 * 5 + 1, 2 * 5 + 1, 3 * 5 + 1, 4 * 5 + 1, etc, din vector.
+         *len_key in acest caz = 5 => indicele elementului de pe linia j si coloana i este:
+         len_key * j + i;
+    -> Primul pas a fost calculul numarului de linii ale matricei dupa formula data.
+    -> Dupa aceea vom face doua loop-uri:
+         *unul cu ajutorul caruia vom parcurge vectorul cu ordinea de introducere a coloanelor(loop_i):
+         *un alt loop in interiorul primului(loop_j) cu ajutorul caruia vom stabili indicele pentru linie
+         *in interiorul acestui loop putem accesa elementele astfel: haystack[len_key * j + key[i]] pentru a
+     extrage elementele de pe coloana key[i] si de pe linia j.
+    -> Vom folosi un alt indice k, pentru a putea adauga in ciphertext si pe care il vom incrementa dupa fiecare
+    adaugare a unui element din haystack. 
+
+-Cache Load Simulation:
+    -> In prima faza am calculat tag-ul si offset-ul adresei de unde trebuia sa extrag octetul.
+    -> Ulterior am iterat prin vectorul de tags ca sa vad daca gasesc tag-ul calculat mai devreme.
+    -> In cazul in care gaseam tag-ul saream la un label cache_hit unde realizam operatiile specifice
+    acestei actiunii: extrageam octetul de pe linia i si coloana offset din matricea cache, unde il
+    reprezinta index-ul la care am gasit tag-ul in vector, apoi inseram acest octet la adresa registrului
+    data ca parametru functiei.
+    -> In cazul in care nu gaseam tag-ul saream la un label cache_miss unde efectuam urmatoarele operatii:
+         *calculam adresa de plecare, adica adresa de unde incepeam sa extrag octeti din memorie pentru
+         a-i putea incarca in cache, aceasta adresa era simplu de calculat(faceam doar un shift la stanga
+         cu 3 pozitii a valorii tag-ului calculata la inceputul functiei).
+         *am calculat adresa liniei to_replace din matricea cache(acolo unde trebuia sa incarc octetii
+         extrasi din memorie).
+         *cu ajutorul unui loop faceam simultan atat extragerea din memorie, cat si incarcarea octetului
+         extras pe pozitia curenta(data de contor) din cadrul liniei to_replace din cache.
+         *inseram pe pozitia to_replace din vectorul de tags valoare tag-ului calculat, marcand astfel
+         faptul ca am incarcat octeti pe linia din cache pe care o reprezinta tag-ul si pentru a cunoaste
+         la urmatoarele run-uri faptul ca acolo au mai fost incarcate date.
+         *extrageam din matricea cache elementul de coordonate [to_replace][offset] pe care il inseram
+         la adresa registrului data ca parametru. 
